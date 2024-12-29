@@ -1,10 +1,11 @@
 class Ship {
-    constructor(length) {
+    constructor(length, id = 0) {
         if (!this.checkLength(length)) {
             throw Error("Invalid length");
         }
         this.length = length;
         this.hitCount = 0;
+        this.id = id;
     }
 
     checkLength(length) {
@@ -16,7 +17,6 @@ class Ship {
 
     hit() {
         this.hitCount += 1;
-        this.isSunk();
     }
 
     isSunk() {

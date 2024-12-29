@@ -1,4 +1,4 @@
-import Ship from "../modules/Ship";
+import Ship from "../src/modules/Ship";
 
 describe("Testing the length of the ships", () => {
     test("Should be no less than 1", () => {

@@ -1,5 +1,5 @@
-import Gameboard from "../modules/Gameboard";
-import Ship from "../modules/Ship";
+import Gameboard from "../src/modules/Gameboard";
+import Ship from "../src/modules/Ship";
 describe("Test ship placement", () => {
     test("Correct placement in r direction", () => {
         const g = new Gameboard();
@@ -21,8 +21,8 @@ describe("Test ship placement", () => {
         g.receiveAttack("1A");
 
         expect(g.board).toStrictEqual({
-            1: ["X", ...new Array(9).fill(".")],
-            2: new Array(10).fill("."),
+            1: ["X", "·", ...new Array(8).fill(".")],
+            2: ["·", "·", ...new Array(8).fill(".")],
             3: new Array(10).fill("."),
             4: new Array(10).fill("."),
             5: new Array(10).fill("."),
@@ -36,8 +36,8 @@ describe("Test ship placement", () => {
         g.receiveAttack("2A");
 
         expect(g.board).toStrictEqual({
-            1: ["X", ...new Array(9).fill(".")],
-            2: ["O", ...new Array(9).fill(".")],
+            1: ["X", "·", ...new Array(8).fill(".")],
+            2: ["·", "·", ...new Array(8).fill(".")],
             3: new Array(10).fill("."),
             4: new Array(10).fill("."),
             5: new Array(10).fill("."),
@@ -82,5 +82,25 @@ describe("Test ship placement", () => {
     test("Invalid placement in right direction", () => {
         const g = new Gameboard();
         expect(() => g.placeShip("9H", "r", 4)).toThrow("Invalid fit");
+    });
+});
+
+describe("Testing coords", () => {
+    test("10th row", () => {
+        const g = new Gameboard();
+        g.placeShip("10H", "r", 2);
+        const s = new Ship(2);
+        expect(g.board).toStrictEqual({
+            1: new Array(10).fill("."),
+            2: new Array(10).fill("."),
+            3: new Array(10).fill("."),
+            4: new Array(10).fill("."),
+            5: new Array(10).fill("."),
+            6: new Array(10).fill("."),
+            7: new Array(10).fill("."),
+            8: new Array(10).fill("."),
+            9: new Array(10).fill("."),
+            10: [...new Array(7).fill("."), s, s, "."],
+        });
     });
 });
