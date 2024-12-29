@@ -1,30 +1,6 @@
 const Player = require("./modules/Player");
-
-const player1Ships = [
-    { coordinate: "2B", direction: "d", length: 1 },
-    { coordinate: "1E", direction: "d", length: 1 },
-    { coordinate: "2G", direction: "r", length: 3 },
-    { coordinate: "4A", direction: "r", length: 2 },
-    { coordinate: "4E", direction: "d", length: 4 },
-    { coordinate: "5I", direction: "d", length: 1 },
-    { coordinate: "8H", direction: "r", length: 1 },
-    { coordinate: "9B", direction: "d", length: 2 },
-    { coordinate: "9D", direction: "r", length: 3 },
-    { coordinate: "10H", direction: "r", length: 2 },
-];
-
-const player2Ships = [
-    { coordinate: "2B", direction: "d", length: 1 },
-    { coordinate: "1E", direction: "d", length: 1 },
-    { coordinate: "2G", direction: "r", length: 3 },
-    { coordinate: "4A", direction: "r", length: 2 },
-    { coordinate: "4E", direction: "d", length: 4 },
-    { coordinate: "5I", direction: "d", length: 1 },
-    { coordinate: "8H", direction: "r", length: 1 },
-    { coordinate: "9B", direction: "d", length: 2 },
-    { coordinate: "9D", direction: "r", length: 3 },
-    { coordinate: "10H", direction: "r", length: 2 },
-];
+const player1Ships = require("./const");
+const player2Ships = require("./const");
 
 const player1Gameboard = document.querySelector(".player1__gameboard");
 const player2Gameboard = document.querySelector(".player2__gameboard");
@@ -32,16 +8,74 @@ const mainGame = document.querySelector(".game");
 const popUp = document.querySelector(".pop-up");
 const p = popUp.querySelector("p");
 const button = popUp.querySelector("button");
+const variants = document.querySelectorAll(".img-variants");
+const startGameButton = document.querySelector(".choice__button");
+const playersChoice = document.querySelector(".players-choice");
 
-const player1 = new Player("cpu", 1);
-const player2 = new Player("cpu", 2);
+const ship = document.querySelector(".ship");
+let direction = "r";
+
+let player1, player2;
+let player1_type = "player";
+let player2_type = "cpu";
 
 let attackingPlayer = player1;
 let receivingPlayer = player2;
 let receivingPlayerGameboard = player2Gameboard;
 let gameEnded = false;
 
-startGame();
+variants.forEach((variant) => {
+    variant.addEventListener("click", (e) => {
+        const otherVariant = e.target.classList.contains("cpu")
+            ? e.target.parentNode.querySelector(".person")
+            : e.target.parentNode.querySelector(".cpu");
+
+        e.target.classList.toggle("chosen");
+        otherVariant.classList.toggle("chosen");
+
+        const playerNumber = Number(e.target.parentNode.id);
+        if (playerNumber === 1) {
+            player1_type = e.target.id;
+        } else {
+            player2_type = e.target.id;
+        }
+    });
+});
+
+startGameButton.addEventListener("click", () => startGame());
+
+ship.addEventListener("dragstart", (e) => {
+    const length = Number(ship.id);
+    player1Gameboard.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const { firstC, secondC } = player1.gameboard.getCoords(e.target.id);
+        for (let i = 0; i < length; i++) {
+            if (direction === "r") {
+                if (secondC + i < 10) {
+                    player1Gameboard.querySelector(
+                        `.c${String(firstC)}m${String(secondC + i)}`
+                    ).style["background-color"] = player1.gameboard.draggingShip(
+                        e.target.id,
+                        "r",
+                        length
+                    );
+                }
+            }
+        }
+    });
+
+    player1Gameboard.addEventListener("dragleave", (e) => revertColor(e));
+
+    player1Gameboard.addEventListener("drop", (e) => {
+        const check = player1.gameboard.placeShip(e.target.id, direction, Number(ship.id));
+        console.log(check);
+        if (check === "Success") {
+            renderShips();
+        } else {
+            revertColor(e);
+        }
+    });
+});
 
 player1Gameboard.addEventListener("click", (e) => makeATurn({ e, player: player1 }));
 player2Gameboard.addEventListener("click", (e) => makeATurn({ e, player: player2 }));
@@ -54,6 +88,26 @@ function render(div, el) {
         div.style["background-color"] = "red";
     } else {
         div.style["background-color"] = "gray";
+    }
+}
+
+function revertColor(e) {
+    e.preventDefault();
+    const { firstC, secondC } = player1.gameboard.getCoords(e.target.id);
+    const length = Number(ship.id);
+    for (let i = 0; i < length; i++) {
+        if (direction === "r") {
+            if (secondC + i < 10) {
+                const div = player1Gameboard.querySelector(
+                    `.c${String(firstC)}m${String(secondC + i)}`
+                );
+                if (div.textContent === "") {
+                    div.style["background-color"] = "";
+                } else if (div.textContent === "s") {
+                    div.style["background-color"] = "green";
+                }
+            }
+        }
     }
 }
 
@@ -80,24 +134,22 @@ function renderShips() {
         for (let j = 0; j < 10; j++) {
             let cell1 = player1.gameboard.board[i][j];
             let cell2 = player2.gameboard.board[i][j];
-            if (cell1 !== ".") {
+            if (cell1 !== "." && cell1 !== "o") {
                 cell1 = "s";
             } else {
                 cell1 = "";
             }
 
-            if (cell2 !== ".") {
-                cell2 = "";
+            if (cell2 !== "." && cell2 !== "o") {
+                cell2 = "s";
             } else {
                 cell2 = "";
             }
 
-            newDiv1.innerHTML += `<div class="cell c${i}${String.fromCharCode(
-                65 + j
-            )}" id="${i}${String.fromCharCode(65 + j)}">${cell1}</div>`;
-            newDiv2.innerHTML += `<div class="cell c${i}${String.fromCharCode(
-                65 + j
-            )}" id="${i}${String.fromCharCode(65 + j)}">${cell2}</div>`;
+            newDiv1.innerHTML += `<div class="cell c${i}m${j}" id="${i}m${j}" style="${
+                cell1 === "s" ? "background-color: green" : ""
+            }">${cell1}</div>`;
+            newDiv2.innerHTML += `<div class="cell c${i}m${j}" id="${i}m${j}">${cell2}</div>`;
         }
     }
 }
@@ -141,9 +193,7 @@ function renderCells(changedCells) {
     for (let i of changedCells) {
         const [firstC, secondC] = i;
 
-        const d = receivingPlayerGameboard.querySelector(
-            `.c${firstC}${String.fromCharCode(65 + secondC)}`
-        );
+        const d = receivingPlayerGameboard.querySelector(`.c${firstC}m${secondC}`);
 
         render(d, receivingPlayer.gameboard.board[firstC][secondC]);
     }
@@ -170,6 +220,9 @@ function writeWinner() {
 }
 
 function startGame() {
+    player1 = new Player(player1_type);
+    player2 = new Player(player2_type);
+
     player1.gameboard.reset();
     player2.gameboard.reset();
 
@@ -183,6 +236,8 @@ function startGame() {
     placeShips();
     renderShips();
 
+    playersChoice.classList.add("hidden");
+    mainGame.classList.remove("hidden");
     mainGame.classList.remove("blurry");
     popUp.classList.add("hidden");
 

@@ -30,7 +30,7 @@ class Player {
             secondEl = p - 100;
         }
 
-        p = `${firstEl}${String.fromCharCode(65 + Number(secondEl))}`;
+        p = `${firstEl}m${secondEl}`;
         return p;
     }
 

@@ -19,31 +19,49 @@ class Gameboard {
         this.shipCoords = {};
     }
 
+    draggingShip(coordinate, direction, length) {
+        const { firstC, secondC } = this.getCoords(coordinate);
+
+        // Check if the placement of ship is valid
+        if (!this.checkValidCoords(firstC, secondC)) return "red";
+        if (!this.checkValidDirection(direction)) return "red";
+        if (!this.checkValidFit(firstC, secondC, direction, length)) return "red";
+        if (!this.checkValidPlacement(firstC, secondC, direction, length)) return "red";
+
+        return "green";
+    }
+
     placeShip(coordinate, direction, length) {
         const { firstC, secondC } = this.getCoords(coordinate);
 
         // Check if the placement of ship is valid
-        if (!this.checkValidCoords(firstC, secondC)) throw Error("Invalid coords");
-        if (!this.checkValidDirection(direction)) throw Error("Invalid direction");
-        if (!this.checkValidFit(firstC, secondC, direction, length)) throw Error("Invalid fit");
+        if (!this.checkValidCoords(firstC, secondC)) return "Invalid coords";
+        if (!this.checkValidDirection(direction)) return "Invalid direction";
+        if (!this.checkValidFit(firstC, secondC, direction, length)) return "Invalid fit";
+        if (!this.checkValidPlacement(firstC, secondC, direction, length))
+            return "Invalid placement";
 
         const s = new Ship(length, this.ships);
         this.shipCoords[this.ships] = []; // Storing the coordinates of ships for marking surrounding cells
         if (direction === "r") {
             for (let i = secondC; i < length + secondC; i++) {
-                if (this.board[firstC][i] !== ".") throw Error("Invalid placement"); // If there is a ship already
                 this.board[firstC][i] = s;
                 this.shipCoords[this.ships].push([firstC, i]);
+                this.sinkXCoords(firstC, i, "o");
             }
         } else {
             for (let i = firstC; i < length + firstC; i++) {
-                if (this.board[i][secondC] !== ".") throw Error("Invalid placement");
                 this.board[i][secondC] = s;
                 this.shipCoords[this.ships].push([i, secondC]);
+                this.sinkXCoords(i, secondC, "o");
             }
         }
 
+        this.sinkLastCoords(this.shipCoords[s.id][0], "o");
+        this.sinkLastCoords(this.shipCoords[s.id][this.shipCoords[s.id].length - 1], "o");
+
         this.ships += 1;
+        return "Success";
     }
 
     receiveAttack(coordinate) {
@@ -86,7 +104,7 @@ class Gameboard {
                 // Game over
                 end = true;
             }
-        } else if (this.board[firstC][secondC] === ".") {
+        } else if (this.board[firstC][secondC] === "." || this.board[firstC][secondC] === "o") {
             validTurn = true;
             this.board[firstC][secondC] = "·";
         }
@@ -95,28 +113,28 @@ class Gameboard {
         return { changedCells, hit, end, validTurn, sunk, hitCell };
     }
 
-    sinkXCoords(firstC, secondC) {
+    sinkXCoords(firstC, secondC, sym = "·") {
         const arr = [];
         if (firstC > 1) {
             if (secondC > 0) {
-                this.board[firstC - 1][secondC - 1] = "·";
+                this.board[firstC - 1][secondC - 1] = sym;
                 arr.push([firstC - 1, secondC - 1]);
             }
 
             if (secondC < 9) {
-                this.board[firstC - 1][secondC + 1] = "·";
+                this.board[firstC - 1][secondC + 1] = sym;
                 arr.push([firstC - 1, secondC + 1]);
             }
         }
 
         if (firstC < 10) {
             if (secondC > 0) {
-                this.board[firstC + 1][secondC - 1] = "·";
+                this.board[firstC + 1][secondC - 1] = sym;
                 arr.push([firstC + 1, secondC - 1]);
             }
 
             if (secondC < 9) {
-                this.board[firstC + 1][secondC + 1] = "·";
+                this.board[firstC + 1][secondC + 1] = sym;
                 arr.push([firstC + 1, secondC + 1]);
             }
         }
@@ -124,33 +142,45 @@ class Gameboard {
         return arr;
     }
 
-    sinkLastCoords(arr) {
+    sinkLastCoords(arr, sym = "·") {
         const [firstC, secondC] = arr;
         const newArr = [];
         if (firstC > 1) {
-            if (this.board[firstC - 1][secondC] == ".") {
-                this.board[firstC - 1][secondC] = "·";
+            if (
+                this.board[firstC - 1][secondC] === "." ||
+                this.board[firstC - 1][secondC] === "o"
+            ) {
+                this.board[firstC - 1][secondC] = sym;
                 newArr.push([firstC - 1, secondC]);
             }
         }
 
         if (firstC < 10) {
-            if (this.board[firstC + 1][secondC] === ".") {
-                this.board[firstC + 1][secondC] = "·";
+            if (
+                this.board[firstC + 1][secondC] === "." ||
+                this.board[firstC + 1][secondC] === "o"
+            ) {
+                this.board[firstC + 1][secondC] = sym;
                 newArr.push([firstC + 1, secondC]);
             }
         }
 
         if (secondC > 0) {
-            if (this.board[firstC][secondC - 1] === ".") {
-                this.board[firstC][secondC - 1] = "·";
+            if (
+                this.board[firstC][secondC - 1] === "." ||
+                this.board[firstC][secondC - 1] === "o"
+            ) {
+                this.board[firstC][secondC - 1] = sym;
                 newArr.push([firstC, secondC - 1]);
             }
         }
 
         if (secondC < 9) {
-            if (this.board[firstC][secondC + 1] === ".") {
-                this.board[firstC][secondC + 1] = "·";
+            if (
+                this.board[firstC][secondC + 1] === "." ||
+                this.board[firstC][secondC + 1] === "o"
+            ) {
+                this.board[firstC][secondC + 1] = sym;
                 newArr.push([firstC, secondC + 1]);
             }
         }
@@ -171,14 +201,24 @@ class Gameboard {
         return true;
     }
 
-    checkValidPlacement(firstC, secondC, direction, length) {}
+    checkValidPlacement(firstC, secondC, direction, length) {
+        if (direction === "r") {
+            for (let i = secondC; i < length + secondC; i++) {
+                if (this.board[firstC][i] !== ".") return false; // If there is a ship already
+            }
+        } else {
+            for (let i = firstC; i < length + firstC; i++) {
+                if (this.board[i][secondC] !== ".") return false;
+            }
+        }
+
+        return true;
+    }
 
     getCoords(coordinate) {
-        const firstC = Number(coordinate.length === 3 ? coordinate.substring(0, 2) : coordinate[0]);
-        const secondC =
-            coordinate.length === 3
-                ? coordinate[2].charCodeAt(0) - "A".charCodeAt(0)
-                : coordinate[1].charCodeAt(0) - "A".charCodeAt(0);
+        let [firstC, secondC] = coordinate.split("m");
+        firstC = Number(firstC);
+        secondC = Number(secondC);
         return { firstC, secondC };
     }
 

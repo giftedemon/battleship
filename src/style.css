@@ -79,15 +79,15 @@ main {
 
 .players-choice__title {
     font-size: 2.75rem;
-    margin-bottom: 2rem;
+    margin-bottom: 5rem;
 }
 
 .players {
     width: 100%;
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 3rem;
 }
 
 .player {
@@ -96,6 +96,36 @@ main {
 }
 
 .player__title {
+    font-size: 2rem;
+    margin-bottom: 3rem;
+}
+
+.player__variants {
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+    width: 600px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.player__variants img {
+    width: 100px;
+    flex: 50%;
+    border: 5px solid black;
+    border-radius: 10px;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+.player__variants .chosen {
+    border: 5px solid green;
+}
+
+.choice__button {
+    margin-top: 5rem;
+    padding: 1rem 3rem;
     font-size: 2rem;
 }
 
@@ -171,4 +201,24 @@ button {
 
 .hidden {
     display: none;
+}
+
+/* Ships */
+.ships {
+    display: flex;
+    flex-direction: column;
+}
+
+.ship {
+    background-color: green;
+    display: flex;
+    width: 120px;
+    height: 60px;
+    border: 1px solid black;
+}
+
+.ship div {
+    width: 60px;
+    height: 60px;
+    border: 1px solid black;
 }
