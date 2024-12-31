@@ -5,7 +5,7 @@ class Player {
         this.type = type;
         this.positions = Array.from({ length: 100 }, (_, i) => i + 10);
         this.potentialShip = [];
-        this.potentialCell = null;
+        this.potentialCell = 29;
         this.potentialPlaces = [-10, 1, 10, -1];
         this.potentialPlaceIndex = 0;
         this.potentialPlace = this.potentialPlaces[this.potentialPlaceIndex];
@@ -44,7 +44,12 @@ class Player {
                 if (this.potentialShip.length === 0) {
                     this.potentialShip.push([p, -1]);
                     while (this.potentialPlaceIndex < 4) {
-                        if (this.positions.indexOf(this.potentialPlace + p) !== -1) {
+                        if (
+                            this.positions.indexOf(this.potentialPlace + p) !== -1 &&
+                            (!(Math.abs(this.potentialPlace) === 1) ||
+                                Math.floor((this.potentialPlace + p) / 10) - Math.floor(p / 10) ===
+                                    0)
+                        ) {
                             this.potentialCell = this.potentialPlace + p;
                             break;
                         } else {
@@ -55,7 +60,11 @@ class Player {
                 } else {
                     this.potentialShip[0][1] = this.potentialPlaceIndex;
 
-                    if (this.positions.indexOf(this.potentialPlace + p) !== -1) {
+                    if (
+                        this.positions.indexOf(this.potentialPlace + p) !== -1 &&
+                        (!(Math.abs(this.potentialPlace) === 1) ||
+                            Math.floor((this.potentialPlace + p) / 10) - Math.floor(p / 10) === 0)
+                    ) {
                         this.potentialCell = this.potentialPlace + p;
                     } else {
                         this.potentialPlaceIndex += 2;
@@ -77,7 +86,12 @@ class Player {
                     this.potentialPlaceIndex += 1;
                     this.potentialPlace = this.potentialPlaces[this.potentialPlaceIndex];
                     while (this.potentialPlaceIndex < 4) {
-                        if (this.positions.indexOf(this.potentialPlace + p) !== -1) {
+                        if (
+                            this.positions.indexOf(this.potentialPlace + p) !== -1 &&
+                            (!(Math.abs(this.potentialPlace) === 1) ||
+                                Math.floor((this.potentialPlace + p) / 10) - Math.floor(p / 10) ===
+                                    0)
+                        ) {
                             this.potentialCell = this.potentialPlace + p;
                             break;
                         } else {
@@ -111,7 +125,7 @@ class Player {
     reset() {
         this.positions = Array.from({ length: 100 }, (_, i) => i + 10);
         this.potentialShip = [];
-        this.potentialCell = null;
+        this.potentialCell = 29;
         this.potentialPlaces = [-10, 1, 10, -1];
         this.potentialPlaceIndex = 0;
         this.potentialPlace = this.potentialPlaces[this.potentialPlaceIndex];

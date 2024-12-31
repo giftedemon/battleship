@@ -258,8 +258,6 @@ class Gameboard {
         this.ships = 0;
         this.shipCoords = {};
     }
-
-    // fillInvalidCoords(firstC, secondC )
 }
 
 module.exports = Gameboard;

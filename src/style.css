@@ -132,6 +132,14 @@ main {
 /* Game */
 .game {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.gameboard {
+    display: flex;
     gap: 3rem;
 }
 
@@ -152,6 +160,12 @@ main {
     display: flex;
     flex-direction: column;
     border: 1px solid black;
+}
+
+.game__begin {
+    width: fit-content;
+    padding: 1rem 3rem;
+    font-size: 1.5rem;
 }
 
 .row {

@@ -1,6 +1,5 @@
 const Player = require("./modules/Player");
-const player1Ships = require("./const");
-const player2Ships = require("./const");
+const shipsCoords = require("./const");
 
 const player1Gameboard = document.querySelector(".player1__gameboard");
 const player2Gameboard = document.querySelector(".player2__gameboard");
@@ -11,9 +10,11 @@ const button = popUp.querySelector("button");
 const variants = document.querySelectorAll(".img-variants");
 const startGameButton = document.querySelector(".choice__button");
 const playersChoice = document.querySelector(".players-choice");
+const beginGameButton = document.querySelector(".game__begin");
 
 const ship = document.querySelector(".ship");
 let direction = "r";
+const randomizeButtons = document.querySelectorAll(".random");
 
 let player1, player2;
 let player1_type = "player";
@@ -22,6 +23,7 @@ let player2_type = "cpu";
 let attackingPlayer = player1;
 let receivingPlayer = player2;
 let receivingPlayerGameboard = player2Gameboard;
+let beginGame = false;
 let gameEnded = false;
 
 variants.forEach((variant) => {
@@ -30,8 +32,8 @@ variants.forEach((variant) => {
             ? e.target.parentNode.querySelector(".person")
             : e.target.parentNode.querySelector(".cpu");
 
-        e.target.classList.toggle("chosen");
-        otherVariant.classList.toggle("chosen");
+        e.target.classList.add("chosen");
+        otherVariant.classList.remove("chosen");
 
         const playerNumber = Number(e.target.parentNode.id);
         if (playerNumber === 1) {
@@ -43,6 +45,20 @@ variants.forEach((variant) => {
 });
 
 startGameButton.addEventListener("click", () => startGame());
+
+randomizeButtons.forEach((el) => {
+    el.addEventListener("click", (e) => {
+        const playerNumber = Number(e.target.id);
+        let player;
+
+        if (playerNumber === 1) player = player1;
+        else player = player2;
+
+        player.gameboard.reset();
+        placeShips(player);
+        renderShips();
+    });
+});
 
 ship.addEventListener("dragstart", (e) => {
     const length = Number(ship.id);
@@ -75,6 +91,21 @@ ship.addEventListener("dragstart", (e) => {
             revertColor(e);
         }
     });
+});
+
+beginGameButton.addEventListener("click", () => {
+    if (player1.gameboard.ships !== 10) {
+        console.log("Player 1 is not ready");
+        return;
+    }
+
+    if (player2.gameboard.ships !== 10) {
+        console.log("Player 2 is not ready");
+        return;
+    }
+    beginGame = true;
+    randomizeButtons.forEach((el) => el.classList.add("hidden"));
+    beginGameButton.classList.add("hidden");
 });
 
 player1Gameboard.addEventListener("click", (e) => makeATurn({ e, player: player1 }));
@@ -111,11 +142,11 @@ function revertColor(e) {
     }
 }
 
-function placeShips() {
-    for (let i = 0; i < player1Ships.length; i++) {
-        const { coordinate, direction, length } = player1Ships[i];
-        player1.gameboard.placeShip(coordinate, direction, length);
-        player2.gameboard.placeShip(coordinate, direction, length);
+function placeShips(player) {
+    const randomCoords = shipsCoords[Math.floor(Math.random() * shipsCoords.length)];
+    for (let i = 0; i < randomCoords.length; i++) {
+        const { coordinate, direction, length } = randomCoords[i];
+        player.gameboard.placeShip(coordinate, direction, length);
     }
 }
 
@@ -141,7 +172,7 @@ function renderShips() {
             }
 
             if (cell2 !== "." && cell2 !== "o") {
-                cell2 = "s";
+                cell2 = "";
             } else {
                 cell2 = "";
             }
@@ -155,7 +186,7 @@ function renderShips() {
 }
 
 function makeATurn({ e, player }) {
-    if (gameEnded || player === attackingPlayer) return;
+    if (!beginGame || gameEnded || player === attackingPlayer) return;
 
     if (player === receivingPlayer) {
         let cell;
@@ -233,8 +264,12 @@ function startGame() {
     receivingPlayerGameboard = player2Gameboard;
     attackingPlayer = player1;
 
-    placeShips();
+    // placeShips(); Let's experiment
     renderShips();
+
+    beginGame = false;
+    randomizeButtons.forEach((el) => el.classList.remove("hidden"));
+    beginGameButton.classList.remove("hidden");
 
     playersChoice.classList.add("hidden");
     mainGame.classList.remove("hidden");

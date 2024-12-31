@@ -52,15 +52,21 @@
             </div>
 
             <div class="game hidden">
-                <div class="game__gameboard player1__side">
-                    <h3>Player 1</h3>
-                    <div class="player__gameboard player1__gameboard"></div>
+                <div class="gameboard">
+                    <div class="game__gameboard player1__side">
+                        <h3>Player 1</h3>
+                        <div class="player__gameboard player1__gameboard"></div>
+                        <button class="random" type="button" id="1">Randomize</button>
+                    </div>
+
+                    <div class="game__gameboard player2__side">
+                        <h3>Player 2</h3>
+                        <div class="player__gameboard player2__gameboard"></div>
+                        <button class="random" type="button" id="2">Randomize</button>
+                    </div>
                 </div>
 
-                <div class="game__gameboard player2__side">
-                    <h3>Player 2</h3>
-                    <div class="player__gameboard player2__gameboard"></div>
-                </div>
+                <button class="game__begin" type="button">Begin</button>
             </div>
 
             <div class="ships hidden" style="display: none">
