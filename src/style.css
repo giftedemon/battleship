@@ -140,13 +140,24 @@ main {
 
 .gameboard {
     display: flex;
-    gap: 3rem;
+    gap: 6rem;
+}
+
+.game__text {
+    text-align: center;
+}
+
+.game__text h3 {
+    margin-bottom: 10px;
+}
+
+.game__text p {
+    font-size: 1.1rem;
 }
 
 .game__gameboard {
     flex-direction: column;
-    gap: 3rem;
-    justify-content: center;
+    gap: 2rem;
     align-items: center;
     display: flex;
     margin: 0 auto;
@@ -154,9 +165,14 @@ main {
     flex-grow: 0;
 }
 
+.game__button {
+    display: flex;
+    gap: 3rem;
+}
+
 .player__gameboard {
-    height: 600px;
-    width: 600px;
+    height: 500px;
+    width: 500px;
     display: flex;
     flex-direction: column;
     border: 1px solid black;
@@ -173,8 +189,8 @@ main {
 }
 
 .cell {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border: 1px solid black;
     cursor: pointer;
 }
@@ -218,21 +234,27 @@ button {
 }
 
 /* Ships */
-.ships {
+.ships,
+.ships2 {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    width: 500px;
+    gap: 1rem;
 }
 
-.ship {
-    background-color: green;
+.ship,
+.ship2 {
     display: flex;
-    width: 120px;
-    height: 60px;
-    border: 1px solid black;
+    flex-direction: row;
 }
 
-.ship div {
-    width: 60px;
-    height: 60px;
+div .hidden {
+    display: none;
+}
+
+.ship div,
+.ship2 div {
+    width: 50px;
+    height: 50px;
     border: 1px solid black;
 }
