@@ -1,6 +1,6 @@
-const Ship = require("./Ship");
+import Ship from "./Ship.js";
 
-class Gameboard {
+export default class Gameboard {
     constructor() {
         this.board = {
             1: new Array(10).fill("."),
@@ -259,5 +259,3 @@ class Gameboard {
         this.shipCoords = {};
     }
 }
-
-module.exports = Gameboard;

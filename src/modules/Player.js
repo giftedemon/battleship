@@ -1,11 +1,11 @@
-const Gameboard = require("./Gameboard");
+import Gameboard from "./Gameboard.js";
 
-class Player {
+export default class Player {
     constructor(type, n) {
         this.type = type;
         this.positions = Array.from({ length: 100 }, (_, i) => i + 10);
         this.potentialShip = [];
-        this.potentialCell = 29;
+        this.potentialCell = null;
         this.potentialPlaces = [-10, 1, 10, -1];
         this.potentialPlaceIndex = 0;
         this.potentialPlace = this.potentialPlaces[this.potentialPlaceIndex];
@@ -125,11 +125,9 @@ class Player {
     reset() {
         this.positions = Array.from({ length: 100 }, (_, i) => i + 10);
         this.potentialShip = [];
-        this.potentialCell = 29;
+        this.potentialCell = null;
         this.potentialPlaces = [-10, 1, 10, -1];
         this.potentialPlaceIndex = 0;
         this.potentialPlace = this.potentialPlaces[this.potentialPlaceIndex];
     }
 }
-
-module.exports = Player;

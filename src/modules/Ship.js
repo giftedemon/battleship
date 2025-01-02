@@ -1,4 +1,4 @@
-class Ship {
+export default class Ship {
     constructor(length, id = 0) {
         if (!this.checkLength(length)) {
             throw Error("Invalid length");
@@ -25,5 +25,3 @@ class Ship {
         }
     }
 }
-
-module.exports = Ship;

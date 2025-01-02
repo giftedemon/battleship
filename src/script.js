@@ -1,5 +1,5 @@
-const Player = require("./modules/Player");
-const shipsCoords = require("./const");
+import Player from "./modules/Player.js";
+import shipsCoords from "./const.js";
 
 const player1Gameboard = document.querySelector(".player1__gameboard");
 const player2Gameboard = document.querySelector(".player2__gameboard");
@@ -11,10 +11,21 @@ const variants = document.querySelectorAll(".img-variants");
 const startGameButton = document.querySelector(".choice__button");
 const playersChoice = document.querySelector(".players-choice");
 const beginGameButton = document.querySelector(".game__begin");
+const allReadyP = document.querySelectorAll(".ready");
 
-const ship = document.querySelector(".ship");
-let direction = "r";
+const ships1 = document.querySelectorAll(".ship");
+const shipsList1 = document.querySelector(".ships");
+const ships2 = document.querySelectorAll(".ship2");
+const shipsList2 = document.querySelector(".ships2");
+const resetButtons = document.querySelectorAll(".reset");
+const flipButtons = document.querySelectorAll(".flip");
 const randomizeButtons = document.querySelectorAll(".random");
+const showHideButtons = document.querySelectorAll(".show-hide");
+const allButtons = document.querySelectorAll(".game__button");
+
+let placedShip = false;
+const directions = ["r", "r"];
+const showHideList = [false, false];
 
 let player1, player2;
 let player1_type = "player";
@@ -28,12 +39,19 @@ let gameEnded = false;
 
 variants.forEach((variant) => {
     variant.addEventListener("click", (e) => {
-        const otherVariant = e.target.classList.contains("cpu")
-            ? e.target.parentNode.querySelector(".person")
-            : e.target.parentNode.querySelector(".cpu");
+        let otherVariant, variantText;
+        if (e.target.classList.contains("cpu")) {
+            otherVariant = e.target.parentNode.querySelector(".person");
+            variantText = "CPU";
+        } else {
+            otherVariant = e.target.parentNode.querySelector(".cpu");
+            variantText = "Player";
+        }
 
         e.target.classList.add("chosen");
         otherVariant.classList.remove("chosen");
+
+        e.target.parentNode.parentNode.querySelector(".player__title").textContent = variantText;
 
         const playerNumber = Number(e.target.parentNode.id);
         if (playerNumber === 1) {
@@ -49,30 +67,173 @@ startGameButton.addEventListener("click", () => startGame());
 randomizeButtons.forEach((el) => {
     el.addEventListener("click", (e) => {
         const playerNumber = Number(e.target.id);
-        let player;
+        let player, mainShipsList, playerGameboard;
 
-        if (playerNumber === 1) player = player1;
-        else player = player2;
+        if (playerNumber === 1) {
+            player = player1;
+            playerGameboard = player1Gameboard;
+            mainShipsList = shipsList1;
+        } else {
+            player = player2;
+            playerGameboard = player2Gameboard;
+            mainShipsList = shipsList2;
+        }
+
+        const p = e.target.parentNode.parentNode.querySelector("p");
+        p.textContent = "Ready";
+
+        mainShipsList.classList.add("hidden");
 
         player.gameboard.reset();
         placeShips(player);
-        renderShips();
+        renderShips(player, playerGameboard, playerNumber);
+
+        if (showHideButtons[playerNumber - 1].classList.contains("hidden")) {
+            showHideButtons[playerNumber - 1].classList.remove("hidden");
+        }
     });
 });
 
-ship.addEventListener("dragstart", (e) => {
-    const length = Number(ship.id);
-    player1Gameboard.addEventListener("dragover", (e) => {
+resetButtons.forEach((el) => {
+    el.addEventListener("click", (e) => {
+        const playerNumber = Number(e.target.id);
+        let player, mainShips, mainShipsList, playerGameboard;
+
+        if (playerNumber === 1) {
+            player = player1;
+            mainShips = ships1;
+            mainShipsList = shipsList1;
+            playerGameboard = player1Gameboard;
+        } else {
+            player = player2;
+            mainShips = ships2;
+            mainShipsList = shipsList2;
+            playerGameboard = player2Gameboard;
+        }
+
+        const p = e.target.parentNode.parentNode.querySelector("p");
+        p.textContent = "Not ready";
+
+        player.gameboard.reset();
+        renderShips(player, playerGameboard, playerNumber);
+
+        showHideButtons[playerNumber - 1].classList.add("hidden");
+        showHideButtons[playerNumber - 1].textContent = "Hide";
+        showHideList[playerNumber - 1] = "true";
+
+        mainShipsList.classList.remove("hidden");
+        mainShips.forEach((el) => {
+            el.classList.remove("hidden");
+        });
+    });
+});
+
+flipButtons.forEach((flip) => {
+    flip.addEventListener("click", (e) => {
+        const playerNumber = Number(e.target.id);
+
+        directions[playerNumber - 1] = directions[playerNumber - 1] === "r" ? "d" : "r";
+
+        let shipCSS;
+
+        if (playerNumber === 1) shipCSS = ships1;
+        if (playerNumber === 2) shipCSS = ships2;
+
+        shipCSS.forEach((ship) => {
+            ship.style["flex-direction"] =
+                ship.style["flex-direction"] === "column" ? "row" : "column";
+        });
+    });
+});
+
+showHideButtons.forEach((el) => {
+    el.addEventListener("click", (e) => {
+        const playerNumber = Number(e.target.id);
+        let player, playerGameboard;
+
+        if (playerNumber === 1) {
+            player = player1;
+            playerGameboard = player1Gameboard;
+        } else {
+            player = player2;
+            playerGameboard = player2Gameboard;
+        }
+
+        if (e.target.textContent === "Show") {
+            showHide(true, playerGameboard);
+            e.target.textContent = "Hide";
+            showHideList[playerNumber - 1] = true;
+        } else {
+            showHide(false, playerGameboard);
+            e.target.textContent = "Show";
+            showHideList[playerNumber - 1] = false;
+        }
+    });
+});
+
+[ships1, ships2].forEach((ships) => {
+    ships.forEach((ship) => {
+        ship.addEventListener("dragstart", (e) => {
+            const transparentImg = new Image();
+            transparentImg.src = "";
+            e.dataTransfer.setDragImage(transparentImg, 0, 0);
+
+            ship.classList.add("draggable");
+        });
+
+        ship.addEventListener("dragend", () => {
+            ship.classList.remove("draggable");
+            if (placedShip) {
+                ship.classList.add("hidden");
+                placedShip = false;
+
+                let player;
+
+                if (Number(ship.parentNode.id) === 1) player = player1;
+                else player = player2;
+
+                if (player.gameboard.ships === 10) {
+                    const p = ship.parentNode.parentNode.querySelector("p");
+                    p.textContent = "Ready";
+
+                    showHideButtons[Number(ship.parentNode.id) - 1].classList.remove("hidden");
+                }
+            }
+        });
+    });
+});
+
+[player1Gameboard, player2Gameboard].forEach((playerGameboard) => {
+    playerGameboard.addEventListener("dragover", (e) => {
+        let player, playerNumber;
+        if (playerGameboard === player1Gameboard) {
+            player = player1;
+            playerNumber = 1;
+        } else {
+            player = player2;
+            playerNumber = 2;
+        }
+
         e.preventDefault();
-        const { firstC, secondC } = player1.gameboard.getCoords(e.target.id);
-        for (let i = 0; i < length; i++) {
-            if (direction === "r") {
-                if (secondC + i < 10) {
-                    player1Gameboard.querySelector(
+        const ship = document.querySelector(".draggable");
+        if (Number(ship.parentNode.id) === playerNumber) {
+            const length = Number(ship.id);
+            const { firstC, secondC } = player.gameboard.getCoords(e.target.id);
+            for (let i = 0; i < length; i++) {
+                if (directions[playerNumber - 1] === "r" && secondC + i < 10) {
+                    playerGameboard.querySelector(
                         `.c${String(firstC)}m${String(secondC + i)}`
-                    ).style["background-color"] = player1.gameboard.draggingShip(
+                    ).style["background-color"] = player.gameboard.draggingShip(
                         e.target.id,
                         "r",
+                        length
+                    );
+                } else if (directions[playerNumber - 1] === "d" && firstC + i < 11) {
+                    playerGameboard.querySelector(
+                        `.c${String(firstC + i)}m${String(secondC)}`
+                    ).style["background-color"] = player.gameboard.draggingShip(
+                        e.target.id,
+                        "d",
                         length
                     );
                 }
@@ -80,15 +241,49 @@ ship.addEventListener("dragstart", (e) => {
         }
     });
 
-    player1Gameboard.addEventListener("dragleave", (e) => revertColor(e));
-
-    player1Gameboard.addEventListener("drop", (e) => {
-        const check = player1.gameboard.placeShip(e.target.id, direction, Number(ship.id));
-        console.log(check);
-        if (check === "Success") {
-            renderShips();
+    playerGameboard.addEventListener("dragleave", (e) => {
+        let player, playerNumber;
+        if (playerGameboard === player1Gameboard) {
+            player = player1;
+            playerNumber = 1;
         } else {
-            revertColor(e);
+            player = player2;
+            playerNumber = 2;
+        }
+
+        const ship = document.querySelector(".draggable");
+        const length = Number(ship.id);
+
+        if (Number(ship.parentNode.id) === playerNumber) {
+            revertColor(e, length, player, playerGameboard, directions[playerNumber - 1]);
+        }
+    });
+
+    playerGameboard.addEventListener("drop", (e) => {
+        let player, playerNumber;
+        if (playerGameboard === player1Gameboard) {
+            player = player1;
+            playerNumber = 1;
+        } else {
+            player = player2;
+            playerNumber = 2;
+        }
+
+        const ship = document.querySelector(".draggable");
+        if (Number(ship.parentNode.id) === playerNumber) {
+            const length = Number(ship.id);
+            const check = player.gameboard.placeShip(
+                e.target.id,
+                directions[playerNumber - 1],
+                Number(ship.id)
+            );
+
+            if (check === "Success") {
+                placedShip = true;
+                renderShips(player, playerGameboard, playerNumber);
+            } else {
+                revertColor(e, length, player, playerGameboard, directions[playerNumber - 1]);
+            }
         }
     });
 });
@@ -104,8 +299,10 @@ beginGameButton.addEventListener("click", () => {
         return;
     }
     beginGame = true;
-    randomizeButtons.forEach((el) => el.classList.add("hidden"));
+    allButtons.forEach((el) => el.classList.add("hidden"));
     beginGameButton.classList.add("hidden");
+
+    if (attackingPlayer.type === "cpu") cpuAttack();
 });
 
 player1Gameboard.addEventListener("click", (e) => makeATurn({ e, player: player1 }));
@@ -122,21 +319,23 @@ function render(div, el) {
     }
 }
 
-function revertColor(e) {
+function revertColor(e, length, player, gameboard, direction) {
     e.preventDefault();
-    const { firstC, secondC } = player1.gameboard.getCoords(e.target.id);
-    const length = Number(ship.id);
+    const { firstC, secondC } = player.gameboard.getCoords(e.target.id);
     for (let i = 0; i < length; i++) {
-        if (direction === "r") {
-            if (secondC + i < 10) {
-                const div = player1Gameboard.querySelector(
-                    `.c${String(firstC)}m${String(secondC + i)}`
-                );
-                if (div.textContent === "") {
-                    div.style["background-color"] = "";
-                } else if (div.textContent === "s") {
-                    div.style["background-color"] = "green";
-                }
+        if (direction === "r" && secondC + i < 10) {
+            const div = gameboard.querySelector(`.c${String(firstC)}m${String(secondC + i)}`);
+            if (div.classList.contains("occupied")) {
+                div.style["background-color"] = "green";
+            } else {
+                div.style["background-color"] = "";
+            }
+        } else if (direction === "d" && firstC + i < 11) {
+            const div = gameboard.querySelector(`.c${String(firstC + i)}m${String(secondC)}`);
+            if (div.classList.contains("occupied")) {
+                div.style["background-color"] = "green";
+            } else {
+                div.style["background-color"] = "";
             }
         }
     }
@@ -150,38 +349,44 @@ function placeShips(player) {
     }
 }
 
-function renderShips() {
-    player1Gameboard.innerHTML = "";
-    player2Gameboard.innerHTML = "";
+function renderShips(player, playerGameboard, playerNumber) {
+    playerGameboard.innerHTML = "";
 
     for (let i = 1; i <= 10; i++) {
-        player1Gameboard.innerHTML += `<div class="row${i} row"></div>`;
-        ``;
-        player2Gameboard.innerHTML += `<div class="row${i} row"></div>`;
+        playerGameboard.innerHTML += `<div class="row${i} row"></div>`;
         ``;
 
-        const newDiv1 = player1Gameboard.querySelector(`.row${i}`);
-        const newDiv2 = player2Gameboard.querySelector(`.row${i}`);
+        const newDiv = playerGameboard.querySelector(`.row${i}`);
+
         for (let j = 0; j < 10; j++) {
-            let cell1 = player1.gameboard.board[i][j];
-            let cell2 = player2.gameboard.board[i][j];
-            if (cell1 !== "." && cell1 !== "o") {
-                cell1 = "s";
+            let cell = player.gameboard.board[i][j];
+
+            if (cell !== "." && cell !== "o") {
+                cell = "s";
             } else {
-                cell1 = "";
+                cell = "";
             }
 
-            if (cell2 !== "." && cell2 !== "o") {
-                cell2 = "";
-            } else {
-                cell2 = "";
-            }
-
-            newDiv1.innerHTML += `<div class="cell c${i}m${j}" id="${i}m${j}" style="${
-                cell1 === "s" ? "background-color: green" : ""
-            }">${cell1}</div>`;
-            newDiv2.innerHTML += `<div class="cell c${i}m${j}" id="${i}m${j}">${cell2}</div>`;
+            newDiv.innerHTML += `<div class="cell c${i}m${j} ${
+                cell === "s" ? "occupied" : ""
+            }" id="${i}m${j}" style=""></div>`;
         }
+    }
+
+    showHide(showHideList[playerNumber - 1], playerGameboard);
+}
+
+function showHide(show, playerGameboard) {
+    const allOccupiedCells = playerGameboard.querySelectorAll(".occupied");
+
+    if (show) {
+        allOccupiedCells.forEach((el) => {
+            el.style["background-color"] = "green";
+        });
+    } else {
+        allOccupiedCells.forEach((el) => {
+            el.style["background-color"] = "";
+        });
     }
 }
 
@@ -264,11 +469,39 @@ function startGame() {
     receivingPlayerGameboard = player2Gameboard;
     attackingPlayer = player1;
 
-    // placeShips(); Let's experiment
-    renderShips();
+    if (player1.type === "player") {
+        showHideList[0] = true;
+    }
+    if (player2.type === "player") {
+        showHideList[1] = true;
+    }
+    if (player1.type === "player" && player2.type === "player") {
+        showHideList[0] = false;
+        showHideList[1] = false;
+    }
+
+    showHideButtons.forEach((el, i) => {
+        if (showHideList[i]) {
+            el.textContent = "Hide";
+        } else {
+            el.textContent = "Show";
+        }
+    });
+
+    placeShips(player1);
+    placeShips(player2);
+    renderShips(player1, player1Gameboard, 1);
+    renderShips(player2, player2Gameboard, 2);
+
+    shipsList1.classList.add("hidden");
+    shipsList2.classList.add("hidden");
+
+    allReadyP.forEach((p) => {
+        p.textContent = "Ready";
+    });
 
     beginGame = false;
-    randomizeButtons.forEach((el) => el.classList.remove("hidden"));
+    allButtons.forEach((el) => el.classList.remove("hidden"));
     beginGameButton.classList.remove("hidden");
 
     playersChoice.classList.add("hidden");
@@ -277,8 +510,6 @@ function startGame() {
     popUp.classList.add("hidden");
 
     gameEnded = false;
-
-    if (attackingPlayer.type === "cpu") cpuAttack();
 }
 
 function cpuAttack() {

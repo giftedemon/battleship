@@ -61,4 +61,4 @@ const shipsCoords = [
     ],
 ];
 
-module.exports = shipsCoords;
+export default shipsCoords;

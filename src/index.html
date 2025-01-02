@@ -15,12 +15,14 @@
                         <h4 class="player__title">Player</h4>
                         <div class="player__variants" id="1">
                             <img
+                                draggable="false"
                                 class="img-variants person chosen"
                                 src="./assets/person_icon.png"
                                 alt="Person image"
-                                id="person"
+                                id="player"
                             />
                             <img
+                                draggable="false"
                                 class="img-variants cpu"
                                 src="./assets//cpu_icon.png"
                                 alt="CPU image"
@@ -33,12 +35,14 @@
                         <h4 class="player__title">CPU</h4>
                         <div class="player__variants" id="2">
                             <img
+                                draggable="false"
                                 class="img-variants person"
                                 src="./assets/person_icon.png"
                                 alt="Person image"
-                                id="person"
+                                id="player"
                             />
                             <img
+                                draggable="false"
                                 class="img-variants cpu chosen"
                                 src="./assets/cpu_icon.png"
                                 alt="CPU image"
@@ -54,27 +58,119 @@
             <div class="game hidden">
                 <div class="gameboard">
                     <div class="game__gameboard player1__side">
-                        <h3>Player 1</h3>
+                        <div class="game__text">
+                            <h3>Player 1</h3>
+                            <p class="ready">Not ready</p>
+                        </div>
                         <div class="player__gameboard player1__gameboard"></div>
-                        <button class="random" type="button" id="1">Randomize</button>
+                        <div class="game__button">
+                            <button class="random" type="button" id="1">Randomize</button>
+                            <button class="reset" type="button" id="1">Reset</button>
+                            <button class="flip" type="button" id="1">Flip</button>
+                            <button class="show-hide" type="button" id="1">Show</button>
+                        </div>
+                        <div class="ships" id="1">
+                            <div class="ship" draggable="true" id="4">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="3">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="3">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                            <div class="ship" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="game__gameboard player2__side">
-                        <h3>Player 2</h3>
+                        <div class="game__text">
+                            <h3>Player 2</h3>
+                            <p class="ready">Not ready</p>
+                        </div>
                         <div class="player__gameboard player2__gameboard"></div>
-                        <button class="random" type="button" id="2">Randomize</button>
+                        <div class="game__button">
+                            <button class="random" type="button" id="2">Randomize</button>
+                            <button class="reset" type="button" id="2">Reset</button>
+                            <button class="flip" type="button" id="2">Flip</button>
+                            <button class="show-hide" type="button" id="2">Show</button>
+                        </div>
+                        <div class="ships2" id="2">
+                            <div class="ship2" draggable="true" id="4">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="3">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="3">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                            <div class="ship2" draggable="true" id="1">
+                                <div></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <button class="game__begin" type="button">Begin</button>
-            </div>
-
-            <div class="ships hidden" style="display: none">
-                <div class="ship hidden" draggable="true" id="3">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
             </div>
 
             <div class="pop-up hidden">
@@ -82,6 +178,6 @@
                 <button type="button">New Game</button>
             </div>
         </main>
-        <script src="../dist/bundle.js"></script>
+        <script src="../src/script.js" type="module" defer></script>
     </body>
 </html>
