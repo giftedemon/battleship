@@ -4,7 +4,6 @@
     "main": "index.js",
     "scripts": {
         "test": "jest --watchAll --verbose",
-        "predeploy": "npm run build",
         "deploy": "gh-pages -d src"
     },
     "author": "",
